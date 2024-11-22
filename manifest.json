@@ -1,13 +1,17 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Text-to-Speech Extension",
   "version": "1.2",
   "description": "Reads out selected text when you click the speak icon.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "your_extension_id@example.com"
+    }
+  },
   "icons": {
     "48": "icons/icon48.png"
   },
   "permissions": [
-    "scripting",
     "activeTab",
     "storage"
   ],
@@ -18,7 +22,7 @@
       "all_frames": true
     }
   ],
-  "action": {
+  "browser_action": {
     "default_icon": {
       "48": "icons/icon48.png"
     },
