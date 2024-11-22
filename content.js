@@ -78,9 +78,30 @@
         console.log(`Attempting to read aloud: "${currentSelectedText}"`);
 
         if (currentSelectedText.length > 0 && 'speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(currentSelectedText);
-            speechSynthesis.speak(utterance);
-            console.log("Speech synthesis initiated.");
+            // Get stored settings
+            browser.storage.local.get(['selectedVoice', 'speechSpeed']).then((result) => {
+                const utterance = new SpeechSynthesisUtterance(currentSelectedText);
+
+                // Set the speech speed
+                utterance.rate = result.speechSpeed ? parseFloat(result.speechSpeed) : 1;
+
+                // Set the voice
+                const voices = speechSynthesis.getVoices();
+                if (result.selectedVoice) {
+                    const selectedVoice = voices.find(voice => voice.name === result.selectedVoice);
+                    if (selectedVoice) {
+                        utterance.voice = selectedVoice;
+                    }
+                }
+
+                // Cancel any ongoing speech
+                if (speechSynthesis.speaking) {
+                    speechSynthesis.cancel();
+                }
+
+                speechSynthesis.speak(utterance);
+                console.log("Speech synthesis initiated.");
+            });
         } else if (!('speechSynthesis' in window)) {
             alert('Text-to-Speech is not supported in your browser.');
             console.log("speechSynthesis not supported.");
@@ -112,6 +133,9 @@
                 if (y < window.scrollY + 10) {
                     y = window.scrollY + 10; // 10px padding from the top
                 }
+                if (y + 24 > window.scrollY + window.innerHeight) {
+                    y = window.scrollY + window.innerHeight - 34; // 10px padding from the bottom
+                }
 
                 createSpeakButton(x, y);
             } else {
@@ -127,5 +151,10 @@
             console.log("Click detected outside the speak button. Removing it.");
             removeSpeakButton();
         }
+    });
+
+    // Remove speak button when scrolling
+    window.addEventListener('scroll', function() {
+        removeSpeakButton();
     });
 })();
